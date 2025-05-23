@@ -7,9 +7,9 @@ plugins {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        create("mavenJava", MavenPublication) {
             from components.java
-            groupId = 'com.trend-chat'
+            groupId = 'io.github.Cho-Gall-Dr-Mundo'
             artifactId = 'trend-chat-common'
             version = '1.0.0'
         }
@@ -20,8 +20,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/Cho-Gall-Dr-Mundo/trend-chat-common")
             credentials {
-                username = project.findProperty("gpr.user")
-                password = project.findProperty("gpr.key")
+                username = findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                password = findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
@@ -42,8 +42,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'com.auth0:java-jwt:4.4.0'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-    compileOnly 'org.projectlombok:lombok:1.18.30'
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
 }
