@@ -30,18 +30,18 @@ public class JwtUtil {
         this.refreshSecretKey = refreshSecretKey;
     }
 
-    public String createAccessToken(Long userId, String nickname, String role) {
+    public String createAccessToken(String userId, String nickname, String role) {
         return BEARER_PREFIX + JWT.create()
-                .withSubject(userId.toString())
+                .withSubject(userId)
                 .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 30 * 1000L))
                 .withClaim("nickname", nickname)
                 .withClaim("role", role)
                 .sign(Algorithm.HMAC512(accessSecretKey));
     }
 
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(String userId) {
         return BEARER_PREFIX + JWT.create()
-                .withSubject(userId.toString())
+                .withSubject(userId)
                 .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 14 * 1000L))
                 .sign(Algorithm.HMAC512(refreshSecretKey));
     }
