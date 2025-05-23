@@ -22,8 +22,13 @@ public class JwtUtil {
     private final String REFRESH_TOKEN_HEADER = "refreshToken";
     private final String BEARER_PREFIX = "Bearer ";
 
-    private String accessSecretKey;
-    private String refreshSecretKey;
+    private final String accessSecretKey;
+    private final String refreshSecretKey;
+
+    public JwtUtil(String accessSecretKey, String refreshSecretKey){
+        this.accessSecretKey = accessSecretKey;
+        this.refreshSecretKey = refreshSecretKey;
+    }
 
     public String createAccessToken(Long userId, String nickname, String role) {
         return BEARER_PREFIX + JWT.create()
