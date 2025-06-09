@@ -11,7 +11,7 @@ publishing {
             from components.java
             groupId = 'io.github.Cho-Gall-Dr-Mundo'
             artifactId = 'trend-chat-common'
-            version = '1.0.5'
+            version = '1.0.6'
         }
     }
 
@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'com.auth0:java-jwt:4.4.0'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
