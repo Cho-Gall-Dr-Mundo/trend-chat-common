@@ -5,13 +5,18 @@ plugins {
     id 'maven-publish'
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
             from components.java
             groupId = 'io.github.Cho-Gall-Dr-Mundo'
             artifactId = 'trend-chat-common'
-            version = '1.0.7'
+            version = '1.0.8'
         }
     }
 

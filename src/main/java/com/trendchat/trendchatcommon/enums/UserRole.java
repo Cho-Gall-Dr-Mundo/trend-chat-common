@@ -15,10 +15,17 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum UserRole {
+
+    /** 관리자 권한 */
     ROLE_ADMIN(Authority.ADMIN),
+
+    /** 일반 무료 사용자 권한 */
     ROLE_FREE(Authority.FREE),
+
+    /** 프리미엄 사용자 권한 */
     ROLE_PREMIUM(Authority.PREMIUM);
 
+    /** Spring Security 권한 문자열 (예: ROLE_ADMIN) */
     private final String authority;
 
     /**
@@ -42,8 +49,14 @@ public enum UserRole {
      * </p>
      */
     public static class Authority {
+
+        /** 관리자 권한 문자열 */
         public static final String ADMIN = "ROLE_ADMIN";
+
+        /** 무료 사용자 권한 문자열 */
         public static final String FREE = "ROLE_FREE";
+
+        /** 프리미엄 사용자 권한 문자열 */
         public static final String PREMIUM = "ROLE_PREMIUM";
     }
 }

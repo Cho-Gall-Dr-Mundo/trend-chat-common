@@ -20,8 +20,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthUser {
 
+    /** 사용자 고유 식별자 (예: UUID 또는 DB ID) */
     private String userId;
+
+    /** 사용자 닉네임 */
     private String nickname;
+
+    /** 사용자 권한 (예: ROLE_FREE, ROLE_PREMIUM, ROLE_ADMIN) */
     private UserRole userRole;
+
+    /** 계정 잠김 여부 (true일 경우 잠기지 않음) */
     private boolean accountNonLocked;
 }
