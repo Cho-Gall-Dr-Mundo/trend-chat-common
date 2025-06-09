@@ -16,7 +16,7 @@ publishing {
             from components.java
             groupId = 'io.github.Cho-Gall-Dr-Mundo'
             artifactId = 'trend-chat-common'
-            version = '1.0.8'
+            version = '1.1.0'
         }
     }
 

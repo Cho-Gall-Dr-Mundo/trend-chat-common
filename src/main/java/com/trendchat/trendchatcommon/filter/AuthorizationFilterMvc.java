@@ -33,7 +33,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * 인증이 필요 없는 경로(예: /api/v1/auth/**)는 필터를 건너뜁니다.
  * </p>
  *
- * @author
+ * @author Doolchong
  */
 @Slf4j(topic = "JWT Verification and Authorization")
 @RequiredArgsConstructor
