@@ -6,6 +6,7 @@ import com.trendchat.trendchatcommon.enums.UserRole;
 import com.trendchat.trendchatcommon.exception.InvalidTokenException;
 import com.trendchat.trendchatcommon.exception.JwtTokenExpiredException;
 import com.trendchat.trendchatcommon.util.JwtUtil;
+import com.trendchat.trendchatcommon.util.TokenBlacklistChecker;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.token.TokenService;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -40,9 +42,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthorizationFilterMvc extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistChecker blacklistChecker;
 
     /**
      * 각 HTTP 요청마다 실행되는 JWT 인증 처리 메서드입니다.
+     * <p>
+     * 다음과 같은 흐름으로 동작합니다:
+     * <ol>
+     *     <li>인증이 필요 없는 경로(`/api/v1/auth/**`)는 필터를 통과시킵니다.</li>
+     *     <li>요청 헤더에서 Access Token을 추출합니다.</li>
+     *     <li>토큰이 존재할 경우:
+     *         <ul>
+     *             <li>JWT 유효성 검사를 수행하고, 실패 시 401 응답 반환</li>
+     *             <li>블랙리스트에 포함된 토큰인지 확인하고, 포함된 경우 401 응답 반환</li>
+     *             <li>정상 토큰이면 인증 객체를 생성하여 SecurityContext에 등록</li>
+     *         </ul>
+     *     </li>
+     *     <li>필터 체인의 다음 필터로 요청을 전달합니다.</li>
+     * </ol>
      *
      * @param request     HTTP 요청 객체
      * @param response    HTTP 응답 객체
@@ -66,6 +83,13 @@ public class AuthorizationFilterMvc extends OncePerRequestFilter {
         if (StringUtils.hasText(tokenValue)) {
             try {
                 DecodedJWT info = jwtUtil.validateToken(tokenValue);
+
+                if (blacklistChecker.isBlacklisted(tokenValue)) {
+                    log.warn("Access token is blacklisted: {}", tokenValue);
+                    handleUnauthorizedResponse(response, "Token is blacklisted");
+                    return;
+                }
+
                 setAuthentication(info);
             } catch (JwtTokenExpiredException e) {
                 handleUnauthorizedResponse(response, "Expired token: " + e.getMessage());
