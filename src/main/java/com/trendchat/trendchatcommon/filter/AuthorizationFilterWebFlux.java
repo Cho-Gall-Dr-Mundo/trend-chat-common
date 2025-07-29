@@ -5,8 +5,8 @@ import com.trendchat.trendchatcommon.auth.AuthUser;
 import com.trendchat.trendchatcommon.enums.UserRole;
 import com.trendchat.trendchatcommon.exception.InvalidTokenException;
 import com.trendchat.trendchatcommon.exception.JwtTokenExpiredException;
+import com.trendchat.trendchatcommon.util.BlacklistChecker;
 import com.trendchat.trendchatcommon.util.JwtUtil;
-import com.trendchat.trendchatcommon.util.TokenBlacklistChecker;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ import reactor.core.publisher.Mono;
 public class AuthorizationFilterWebFlux implements WebFilter {
 
     private final JwtUtil jwtUtil;
-    private final TokenBlacklistChecker blacklistChecker;
+    private final BlacklistChecker blacklistChecker;
 
     /**
      * WebFlux 요청에 대한 JWT 인증 필터 처리 메서드입니다.
@@ -51,8 +51,8 @@ public class AuthorizationFilterWebFlux implements WebFilter {
      *     <li>토큰이 존재할 경우:
      *         <ul>
      *             <li>JWT 유효성 검사를 수행하고, 실패 시 401 응답 반환</li>
-     *             <li>토큰이 블랙리스트에 포함된 경우 401 응답 반환</li>
-     *             <li>정상 토큰이면 Authentication 객체를 생성하고 SecurityContext에 등록</li>
+     *             <li>토큰이나 userId가 블랙리스트에 포함된 경우 401 응답 반환</li>
+     *             <li>정상이면 Authentication 객체를 생성하고 SecurityContext에 등록</li>
      *         </ul>
      *     </li>
      *     <li>필터 체인의 다음 WebFilter로 요청을 전달하며, SecurityContext를 함께 설정합니다.</li>
@@ -79,8 +79,9 @@ public class AuthorizationFilterWebFlux implements WebFilter {
 
         try {
             DecodedJWT decoded = jwtUtil.validateToken(tokenValue);
+            String userId = decoded.getSubject();
 
-            if (blacklistChecker.isBlacklisted(tokenValue)) {
+            if (blacklistChecker.isBlacklisted(userId, tokenValue)) {
                 log.warn("Access token is blacklisted: {}", tokenValue);
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();

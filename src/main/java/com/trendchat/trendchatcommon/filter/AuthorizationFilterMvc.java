@@ -5,8 +5,8 @@ import com.trendchat.trendchatcommon.auth.AuthUser;
 import com.trendchat.trendchatcommon.enums.UserRole;
 import com.trendchat.trendchatcommon.exception.InvalidTokenException;
 import com.trendchat.trendchatcommon.exception.JwtTokenExpiredException;
+import com.trendchat.trendchatcommon.util.BlacklistChecker;
 import com.trendchat.trendchatcommon.util.JwtUtil;
-import com.trendchat.trendchatcommon.util.TokenBlacklistChecker;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,7 +42,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthorizationFilterMvc extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final TokenBlacklistChecker blacklistChecker;
+    private final BlacklistChecker blacklistChecker;
 
     /**
      * 각 HTTP 요청마다 실행되는 JWT 인증 처리 메서드입니다.
@@ -54,8 +54,8 @@ public class AuthorizationFilterMvc extends OncePerRequestFilter {
      *     <li>토큰이 존재할 경우:
      *         <ul>
      *             <li>JWT 유효성 검사를 수행하고, 실패 시 401 응답 반환</li>
-     *             <li>블랙리스트에 포함된 토큰인지 확인하고, 포함된 경우 401 응답 반환</li>
-     *             <li>정상 토큰이면 인증 객체를 생성하여 SecurityContext에 등록</li>
+     *             <li>블랙리스트에 포함된 토큰이나 userId인지 확인하고, 포함된 경우 401 응답 반환</li>
+     *             <li>정상이면 인증 객체를 생성하여 SecurityContext에 등록</li>
      *         </ul>
      *     </li>
      *     <li>필터 체인의 다음 필터로 요청을 전달합니다.</li>
@@ -83,8 +83,9 @@ public class AuthorizationFilterMvc extends OncePerRequestFilter {
         if (StringUtils.hasText(tokenValue)) {
             try {
                 DecodedJWT info = jwtUtil.validateToken(tokenValue);
+                String userId = info.getSubject();
 
-                if (blacklistChecker.isBlacklisted(tokenValue)) {
+                if (blacklistChecker.isBlacklisted(userId, tokenValue)) {
                     log.warn("Access token is blacklisted: {}", tokenValue);
                     handleUnauthorizedResponse(response, "Token is blacklisted");
                     return;
